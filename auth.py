@@ -2,7 +2,9 @@ import json
 from flask import request, _request_ctx_stack, abort, session, redirect
 from functools import wraps
 from jose import jwt
+from six.moves import urllib
 from urllib.request import urlopen
+
 
 
 AUTH0_DOMAIN = 'fsndaltwaim.auth0.com'
@@ -74,7 +76,12 @@ def check_permissions(permission, payload):
 
 # implement verify_decode_jwt(token) method
 def verify_decode_jwt(token):
+    print('jwt')
+    # print(f'https://fsndaltwaim.auth0.com/.well-known/jwks.json')
+    # link = 'https://fsndaltwaim.auth0.com/.well-known/jwks.json'
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
+    # print(jsonurl.read())
+    print('jwt2')
     jwks = json.loads(jsonurl.read())
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = {}
@@ -100,11 +107,10 @@ def verify_decode_jwt(token):
                 rsa_key,
                 algorithms=ALGORITHMS,
                 audience=API_AUDIENCE,
-                issuer='https://' + AUTH0_DOMAIN + '/'
+                issuer='https://' + AUTH0_DOMAIN + '/',
+                options={'verify_exp':False},
             )
-
             return payload
-
         except jwt.ExpiredSignatureError:
             raise AuthError({
                 'code': 'token_expired',
@@ -133,22 +139,36 @@ def requires_auth(permission=''):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
+            # print(token)
+            # payload = verify_decode_jwt(token)
+            print('kkkkkk')
             try:
+                print('rrrr')
+                print(verify_decode_jwt(token))
+                
                 payload = verify_decode_jwt(token)
-            except:
+                print(payload)
+                print('hello')
+            except Exception:
+                # print(token)
+                print(f)
+                # print(payload)
+                print(permission)
+                print('hello')
                 raise AuthError({
                     'code':'invalid_token',
                     'description':'Access denied because of invalid token'
-            },401)
+                    }, 401)
+            # print(payload)
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
 
         return wrapper
     return requires_auth_decorator
-def requires_signed_in(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'jwt_token' not in session:
-            return redirect('/')
-        return f(*args, **kwargs)
-    return decorated
+# def requires_signed_in(f):
+#     @wraps(f)
+#     def decorated(*args, **kwargs):
+#         if 'jwt_token' not in session:
+#             return redirect('/')
+#         return f(*args, **kwargs)
+#     return decorated

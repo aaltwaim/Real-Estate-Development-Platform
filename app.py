@@ -1,12 +1,18 @@
 import os
 from flask import Flask, request, abort, jsonify, render_template, session, redirect, url_for
+from werkzeug.exceptions import HTTPException
+from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
-from auth import AuthError, requires_auth, requires_signed_in
-from authlib.flask.client import OAuth
-import constants
 import json
+from auth import AuthError, requires_auth
+# , requires_signed_in
+from jose import jwt
+from authlib.flask.client import OAuth
+from six.moves.urllib.parse import urlencode
+import constants
+
 
 
 AUTH0_CLIENT_ID = constants.AUTH0_CLIENT_ID
@@ -70,7 +76,7 @@ def get_buildings():
 # implement endpoint
 # Get /buildings/<id>
 @app.route('/buildings/<id>', methods=['GET'])
-@requires_auth('get:building-by-id')
+@requires_auth("get:building-by-id")
 def get_building_by_id(jwt, id):
     try:
         building = Building.query.filter(Building.id == id).one_or_none()
@@ -79,6 +85,7 @@ def get_building_by_id(jwt, id):
             'building': [building.show()]
         })
     except Exception:
+        print(jwt)
         abort(404)
 
 # implement endpoint
@@ -203,7 +210,7 @@ def auth_error_handler(ex):
     return jsonify({
                     "success": False,
                     "error": ex.status_code,
-                    "message": ex.error
+                    "message": ex.error,
                     }), 401
 
 # implement error handler 400
