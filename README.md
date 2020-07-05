@@ -4,6 +4,8 @@
 
 The Project is developed for a Real Estate Company. The website contains list of building, where admin can create, read, update and delete building on the website while the owner csn see the details of its own building.
 
+https://real-estate-platform-altwaim.herokuapp.com/
+
 ## Retrieves a building info(Everyone)
 **GET** `/buildings`
 
