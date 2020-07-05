@@ -119,14 +119,6 @@ class EstateTestCase(unittest.TestCase):
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
 
-
-    
-
-
-
-
-
-
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
