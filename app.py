@@ -23,8 +23,10 @@ AUTH0_AUDIENCE = constants.AUTH0_AUDIENCE
 AUTH0_BASE_URL = 'https://' + constants.AUTH0_DOMAIN
 
 # create and configure the app
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='postgres://aaltwaim@localhost:5432/estate'
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 CORS(app)
 db = SQLAlchemy(app)
 migrate= Migrate(app, db)
