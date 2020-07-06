@@ -35,7 +35,7 @@ class EstateTestCase(unittest.TestCase):
     def test_visitor_get_building_by_id(self):
         res = self.client.get('/buildings/2', headers=self.headers)
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 401)
 
     def test_admin_get_building_by_id(self):
         self.headers.update({'Authorization': 'Bearer '+ token})
@@ -111,7 +111,7 @@ class EstateTestCase(unittest.TestCase):
     def test_visitor_get_units_based_on_building(self):
         res = self.client.get('/buildings/2/units', headers=self.headers)
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 200)
 
     def test_admin_get_units_based_on_building(self):
         self.headers.update({'Authorization': 'Bearer ' + token})

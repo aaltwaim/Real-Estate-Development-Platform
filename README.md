@@ -9,4 +9,6 @@ https://real-estate-platform-altwaim.herokuapp.com/
 ## Retrieves a building info(Everyone)
 **GET** `/buildings`
 
-``` curl -X GET \ https://real-estate-platform-altwaim.herokuapp.com/buildings / -H
+``` 
+curl -X GET \https://real-estate-platform-altwaim.herokuapp.com/buildings\ -H
+```

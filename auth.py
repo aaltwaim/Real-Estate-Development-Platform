@@ -4,12 +4,24 @@ from functools import wraps
 from jose import jwt
 from six.moves import urllib
 from urllib.request import urlopen
+import requests 
+import sys
+import os
 
 
+
+# AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
+# AUTH0_ALGORITHMS = os.environ['AUTH0_ALGORITHMS']
+# AUTH0_AUDIENCE = os.environ['AUTH0_AUDIENCE']
+# AUTH0_CLIENT_ID = os.environ['AUTH0_CLIENT_ID']
+# AUTH0_CALLBACK_URL = os.environ['AUTH0_CALLBACK_URL']
 
 AUTH0_DOMAIN = 'fsndaltwaim.auth0.com'
-ALGORITHMS = ['RS256']
-API_AUDIENCE = 'estate'
+AUTH0_ALGORITHMS = ['RS256']
+AUTH0_AUDIENCE = 'estate'
+AUTH0_CLIENT_ID = 'VcpVbf6dzg1v6QGbmdy4eDDjM0CZB2mr'
+AUTH0_CLIENT_SECRET = 'nT9eYe0YXAxemiwpXNbPOyerz5OHgitV3Y3ao0zTiZBHJ8Yax_gIMKrvqQw5-49b'
+AUTH0_CALLBACK_URL = 'https://localhost:8080/login-results'
 
 ## AuthError Exception
 '''

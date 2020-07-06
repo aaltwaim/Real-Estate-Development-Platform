@@ -6,10 +6,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 import json
-from auth import AuthError, requires_auth
+import sys
+from os import environ as env
+from auth import AuthError, requires_auth, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_CALLBACK_URL, AUTH0_DOMAIN, AUTH0_AUDIENCE
 # , requires_signed_in
 from jose import jwt
-from authlib.flask.client import OAuth
+from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
 import constants
 
@@ -26,6 +28,7 @@ AUTH0_BASE_URL = 'https://' + constants.AUTH0_DOMAIN
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='postgres://aaltwaim@localhost:5432/estate'
+# app.config.from_object(env['APP_SETTINGS'])
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 CORS(app)
 db = SQLAlchemy(app)
