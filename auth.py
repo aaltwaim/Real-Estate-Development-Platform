@@ -4,12 +4,9 @@ from functools import wraps
 from jose import jwt
 from six.moves import urllib
 from urllib.request import urlopen
-import requests 
+import requests
 import sys
 import os
-
-
-
 # AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
 # AUTH0_ALGORITHMS = os.environ['AUTH0_ALGORITHMS']
 # AUTH0_AUDIENCE = os.environ['AUTH0_AUDIENCE']
@@ -21,20 +18,22 @@ AUTH0_ALGORITHMS = ['RS256']
 AUTH0_AUDIENCE = 'estate'
 AUTH0_CLIENT_ID = 'VcpVbf6dzg1v6QGbmdy4eDDjM0CZB2mr'
 AUTH0_CLIENT_SECRET = 'nT9eYe0YXAxemiwpXNbPOyerz5OHgitV3Y3ao0zTiZBHJ8Yax_gIMKrvqQw5-49b'
-AUTH0_CALLBACK_URL = 'https://localhost:8080/login-results'
+AUTH0_CALLBACK_URL = 'https://localhost:5000/login-results'
 
-## AuthError Exception
+# AuthError Exception
 '''
 AuthError Exception
 A standardized way to communicate auth failure modes
 '''
+
+
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
 
 
-## Auth Header
+# Auth Header
 
 # implement get_token_auth_header() method
 
@@ -120,7 +119,7 @@ def verify_decode_jwt(token):
                 algorithms=ALGORITHMS,
                 audience=API_AUDIENCE,
                 issuer='https://' + AUTH0_DOMAIN + '/',
-                options={'verify_exp':False},
+                options={'verify_exp': False},
             )
             return payload
         except jwt.ExpiredSignatureError:
@@ -157,7 +156,6 @@ def requires_auth(permission=''):
             try:
                 print('rrrr')
                 print(verify_decode_jwt(token))
-                
                 payload = verify_decode_jwt(token)
                 print(payload)
                 print('hello')
@@ -168,8 +166,8 @@ def requires_auth(permission=''):
                 print(permission)
                 print('hello')
                 raise AuthError({
-                    'code':'invalid_token',
-                    'description':'Access denied because of invalid token'
+                    'code': 'invalid_token',
+                    'description': 'Access denied because of invalid token'
                     }, 401)
             # print(payload)
             check_permissions(permission, payload)
@@ -177,10 +175,10 @@ def requires_auth(permission=''):
 
         return wrapper
     return requires_auth_decorator
-# def requires_signed_in(f):
-#     @wraps(f)
-#     def decorated(*args, **kwargs):
-#         if 'jwt_token' not in session:
-#             return redirect('/')
-#         return f(*args, **kwargs)
-#     return decorated
+def requires_signed_in(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'jwt_token' not in session:
+            return redirect('/')
+        return f(*args, **kwargs)
+    return decorated

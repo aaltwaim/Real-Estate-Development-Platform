@@ -16,7 +16,6 @@ from six.moves.urllib.parse import urlencode
 import constants
 
 
-
 AUTH0_CLIENT_ID = constants.AUTH0_CLIENT_ID
 AUTH0_CLIENT_SECRET = constants.AUTH0_CLIENT_SECRET
 AUTH0_CALLBACK_URL = constants.AUTH0_CALLBACK_URL
@@ -27,12 +26,14 @@ AUTH0_BASE_URL = 'https://' + constants.AUTH0_DOMAIN
 # create and configure the app
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI']='postgres://aaltwaim@localhost:5432/estate'
+app.secret_key = 'super hard'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://aaltwaim@localhost:5432/estate'
 # app.config.from_object(env['APP_SETTINGS'])
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 CORS(app)
 db = SQLAlchemy(app)
-migrate= Migrate(app, db)
+migrate = Migrate(app, db)
+
 from models import Building, Unit
 
 oauth = OAuth(app)
@@ -48,14 +49,18 @@ auth0 = oauth.register(
     }
 )
 
+
 # main page
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
 @app.route('/login')
 def login():
-    return auth0.authorize_redirect(redirect_uri=AUTH0_CALLBACK_URL, audience= AUTH0_AUDIENCE)
+    return auth0.authorize_redirect(redirect_uri=AUTH0_CALLBACK_URL,
+                                    audience=AUTH0_AUDIENCE)
+
 
 @app.route('/login-results')
 def callback_handling():
@@ -64,6 +69,7 @@ def callback_handling():
     session['jwt_token'] = token
 
     return redirect('/buildings')
+
 
 # implement endpoint
 # Get /buildings
@@ -75,9 +81,11 @@ def get_buildings():
             'success': True,
             'buildings': [building.show() for building in buildings],
         })
-    
+
     except Exception:
         abort(404)
+
+
 # implement endpoint
 # Get /buildings/<id>
 @app.route('/buildings/<id>', methods=['GET'])
@@ -93,6 +101,7 @@ def get_building_by_id(jwt, id):
         print(jwt)
         abort(404)
 
+
 # implement endpoint
 # Post /buildings
 @app.route('/buildings', methods=['POST'])
@@ -106,12 +115,15 @@ def add_building(jwt):
     number_of_units = body.get('number_of_units')
     building_image = body.get('building_image')
 
-    if not ('ownerID' in body and 'name' in body and 'address' in body and 'description' in body
-     and 'number_of_units' in body and 'building_image' in body):
+    if not ('ownerID' in body and 'name' in body and 'address' in body
+            and 'description' in body and 'number_of_units' in body
+            and 'building_image' in body):
         abort(422)
     try:
-        new_building = Building(ownerID=ownerID, name=name, address=address, 
-        description=description, number_of_units=number_of_units, building_image=building_image)
+        new_building = Building(ownerID=ownerID, name=name, address=address,
+                                description=description,
+                                number_of_units=number_of_units,
+                                building_image=building_image)
         new_building.insert()
         return jsonify({
             'success': True,
@@ -120,12 +132,13 @@ def add_building(jwt):
     except Exception:
         abort(422)
 
+
 # implement endpoint
 # Patch /buildings
 @app.route('/buildings/<id>', methods=['PATCH'])
 @requires_auth('patch:buildings')
 def update_building(jwt, id):
-    
+
     building = Building.query.filter(Building.id == id).one_or_none()
     if building:
         try:
@@ -158,6 +171,7 @@ def update_building(jwt, id):
     else:
         abort(404)
 
+
 # implement endpoint
 # delete /buildings/<id>
 @app.route('/buildings/<id>', methods=['DELETE'])
@@ -176,19 +190,22 @@ def delete_building(jwt, id):
     else:
         abort(404)
 
+
 # implement endpoint
 # Get /buildings/<id>/units
 @app.route('/buildings/<int:building_id>/units', methods=['GET'])
 def get_units_based_on_building(building_id):
     try:
-        units_by_building = Unit.query.filter(Unit.building_id == building_id).all()
+        units_by_building = Unit.query.filter(
+            Unit.building_id == building_id).all()
         return jsonify({
             'success': True,
             'buildings': [unit.show() for unit in units_by_building],
         })
-    
+
     except Exception:
         abort(404)
+
 
 # implement error handler 422
 @app.errorhandler(422)
@@ -209,6 +226,7 @@ def not_found(error):
                     "message": "not found"
                     }), 404
 
+
 # implement error handler for AuthError
 @app.errorhandler(AuthError)
 def auth_error_handler(ex):
@@ -218,6 +236,7 @@ def auth_error_handler(ex):
                     "message": ex.error,
                     }), 401
 
+
 # implement error handler 400
 @app.errorhandler(400)
 def bad_request(error):
@@ -226,6 +245,7 @@ def bad_request(error):
                     "error": 400,
                     "message": "bad request"
                     }), 400
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)

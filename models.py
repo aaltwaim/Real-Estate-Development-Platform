@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 
 
-
 class Building(db.Model):
     __tablename__ = 'building'
     id = db.Column(db.Integer, primary_key=True)
@@ -15,7 +14,6 @@ class Building(db.Model):
     building_image = db.Column(db.String(500), default='https://dangerwordfilm.files.wordpress.com/2014/04/coming-soon.png')
     units = db.relationship('Unit', back_populates='building')
 
-
     def __init__(self, ownerID, name, address, description, number_of_units, building_image):
         self.ownerID = ownerID
         self.name = name
@@ -24,14 +22,13 @@ class Building(db.Model):
         self.number_of_units = number_of_units
         self.building_image = building_image
 
-    
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
     def insert(self):
         db.session.add(self)
         db.session.commit()
-    
+
     def update(self):
         db.session.commit()
 
@@ -46,10 +43,9 @@ class Building(db.Model):
             'name': self.name,
             'address': self.address,
             'description': self.description,
-            'number_of_units': self.number_of_units
-            
-            
+            'number_of_units': self.number_of_units,
         }
+
 
 class Unit(db.Model):
     __tablename__ = 'unit'
@@ -76,14 +72,13 @@ class Unit(db.Model):
         self.unit_image = unit_image
         self.building_id = building_id
 
-
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
     def insert(self):
         db.session.add(self)
         db.session.commit()
-    
+
     def update(self):
         db.session.commit()
 
@@ -105,4 +100,3 @@ class Unit(db.Model):
             'building_id': self.building_id,
 
         }
-
