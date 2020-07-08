@@ -7,18 +7,21 @@ from urllib.request import urlopen
 import requests
 import sys
 import os
-# AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
-# AUTH0_ALGORITHMS = os.environ['AUTH0_ALGORITHMS']
-# AUTH0_AUDIENCE = os.environ['AUTH0_AUDIENCE']
-# AUTH0_CLIENT_ID = os.environ['AUTH0_CLIENT_ID']
-# AUTH0_CALLBACK_URL = os.environ['AUTH0_CALLBACK_URL']
 
-AUTH0_DOMAIN = 'fsndaltwaim.auth0.com'
-AUTH0_ALGORITHMS = ['RS256']
-AUTH0_AUDIENCE = 'estate'
-AUTH0_CLIENT_ID = 'VcpVbf6dzg1v6QGbmdy4eDDjM0CZB2mr'
-AUTH0_CLIENT_SECRET = 'nT9eYe0YXAxemiwpXNbPOyerz5OHgitV3Y3ao0zTiZBHJ8Yax_gIMKrvqQw5-49b'
-AUTH0_CALLBACK_URL = 'https://localhost:5000/login-results'
+AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
+AUTH0_ALGORITHMS = os.environ['AUTH0_ALGORITHMS']
+AUTH0_AUDIENCE = os.environ['AUTH0_AUDIENCE']
+AUTH0_CLIENT_ID = os.environ['AUTH0_CLIENT_ID']
+AUTH0_CALLBACK_URL = os.environ['AUTH0_CALLBACK_URL']
+AUTH0_CLIENT_SECRET = os.environ['AUTH0_CLIENT_SECRET']
+
+# AUTH0_DOMAIN = 'fsndaltwaim.auth0.com'
+# AUTH0_ALGORITHMS = ['RS256']
+# AUTH0_AUDIENCE = 'estate'
+# AUTH0_CLIENT_ID = 'VcpVbf6dzg1v6QGbmdy4eDDjM0CZB2mr'
+# AUTH0_CLIENT_SECRET = \
+# 'nT9eYe0YXAxemiwpXNbPOyerz5OHgitV3Y3ao0zTiZBHJ8Yax_gIMKrvqQw5-49b'
+# AUTH0_CALLBACK_URL = 'https://localhost:5000/login-results'
 
 # AuthError Exception
 '''
@@ -35,7 +38,7 @@ class AuthError(Exception):
 
 # Auth Header
 
-# implement get_token_auth_header() method
+# Implement get_token_auth_header() method
 
 def get_token_auth_header():
     auth = request.headers.get('Authorization', None)
@@ -68,7 +71,7 @@ def get_token_auth_header():
     return token
 
 
-# implement check_permissions(permission, payload) method
+# Implement check_permissions(permission, payload) method
 
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
@@ -85,14 +88,9 @@ def check_permissions(permission, payload):
     return True
 
 
-# implement verify_decode_jwt(token) method
+# Implement verify_decode_jwt(token) method
 def verify_decode_jwt(token):
-    print('jwt')
-    # print(f'https://fsndaltwaim.auth0.com/.well-known/jwks.json')
-    # link = 'https://fsndaltwaim.auth0.com/.well-known/jwks.json'
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
-    # print(jsonurl.read())
-    print('jwt2')
     jwks = json.loads(jsonurl.read())
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = {}
@@ -116,22 +114,23 @@ def verify_decode_jwt(token):
             payload = jwt.decode(
                 token,
                 rsa_key,
-                algorithms=ALGORITHMS,
-                audience=API_AUDIENCE,
+                algorithms=AUTH0_ALGORITHMS,
+                audience=AUTH0_AUDIENCE,
                 issuer='https://' + AUTH0_DOMAIN + '/',
                 options={'verify_exp': False},
             )
             return payload
+
         except jwt.ExpiredSignatureError:
             raise AuthError({
                 'code': 'token_expired',
                 'description': 'Token expired.'
             }, 401)
-
         except jwt.JWTClaimsError:
             raise AuthError({
                 'code': 'invalid_claims',
-                'description': 'Incorrect claims. Please, check the audience and issuer.'
+                'description': 'Incorrect claims. \
+                    Please, check the audience and issuer.'
             }, 401)
         except Exception:
             raise AuthError({
@@ -144,37 +143,27 @@ def verify_decode_jwt(token):
             }, 400)
 
 
-# implement @requires_auth(permission) decorator method
+# Implement @requires_auth(permission) decorator method
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
-            # print(token)
-            # payload = verify_decode_jwt(token)
-            print('kkkkkk')
             try:
-                print('rrrr')
-                print(verify_decode_jwt(token))
                 payload = verify_decode_jwt(token)
-                print(payload)
-                print('hello')
             except Exception:
-                # print(token)
-                print(f)
-                # print(payload)
-                print(permission)
-                print('hello')
                 raise AuthError({
                     'code': 'invalid_token',
                     'description': 'Access denied because of invalid token'
                     }, 401)
-            # print(payload)
+
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
 
         return wrapper
     return requires_auth_decorator
+
+
 def requires_signed_in(f):
     @wraps(f)
     def decorated(*args, **kwargs):

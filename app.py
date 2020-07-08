@@ -1,5 +1,13 @@
 import os
-from flask import Flask, request, abort, jsonify, render_template, session, redirect, url_for
+from flask import (
+    Flask,
+    request,
+    abort,
+    jsonify,
+    render_template,
+    session,
+    redirect,
+    url_for)
 from werkzeug.exceptions import HTTPException
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
@@ -8,26 +16,36 @@ from flask_cors import CORS
 import json
 import sys
 from os import environ as env
-from auth import AuthError, requires_auth, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_CALLBACK_URL, AUTH0_DOMAIN, AUTH0_AUDIENCE
-# , requires_signed_in
+from auth import (
+    AuthError, requires_auth,
+    AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET,
+    AUTH0_CALLBACK_URL, AUTH0_DOMAIN, AUTH0_AUDIENCE)
 from jose import jwt
 from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
 import constants
 
+AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
+AUTH0_ALGORITHMS = os.environ['AUTH0_ALGORITHMS']
+AUTH0_AUDIENCE = os.environ['AUTH0_AUDIENCE']
+AUTH0_CLIENT_ID = os.environ['AUTH0_CLIENT_ID']
+AUTH0_CALLBACK_URL = os.environ['AUTH0_CALLBACK_URL']
+AUTH0_CLIENT_SECRET = os.environ['AUTH0_CLIENT_SECRET']
+AUTH0_BASE_URL = 'https://' + AUTH0_DOMAIN
 
-AUTH0_CLIENT_ID = constants.AUTH0_CLIENT_ID
-AUTH0_CLIENT_SECRET = constants.AUTH0_CLIENT_SECRET
-AUTH0_CALLBACK_URL = constants.AUTH0_CALLBACK_URL
-AUTH0_DOMAIN = constants.AUTH0_DOMAIN
-AUTH0_AUDIENCE = constants.AUTH0_AUDIENCE
-AUTH0_BASE_URL = 'https://' + constants.AUTH0_DOMAIN
+# AUTH0_CLIENT_ID = constants.AUTH0_CLIENT_ID
+# AUTH0_CLIENT_SECRET = constants.AUTH0_CLIENT_SECRET
+# AUTH0_CALLBACK_URL = constants.AUTH0_CALLBACK_URL
+# AUTH0_DOMAIN = constants.AUTH0_DOMAIN
+# AUTH0_AUDIENCE = constants.AUTH0_AUDIENCE
+# AUTH0_BASE_URL = 'https://' + constants.AUTH0_DOMAIN
 
-# create and configure the app
+# Create and configure the app
 
 app = Flask(__name__)
 app.secret_key = 'super hard'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://aaltwaim@localhost:5432/estate'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://aaltwaim\
+    @localhost:5432/estate'
 # app.config.from_object(env['APP_SETTINGS'])
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 CORS(app)
@@ -50,7 +68,7 @@ auth0 = oauth.register(
 )
 
 
-# main page
+# Main page
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -71,7 +89,7 @@ def callback_handling():
     return redirect('/buildings')
 
 
-# implement endpoint
+# Implement endpoint
 # Get /buildings
 @app.route('/buildings', methods=['GET'])
 def get_buildings():
@@ -86,7 +104,7 @@ def get_buildings():
         abort(404)
 
 
-# implement endpoint
+# Implement endpoint
 # Get /buildings/<id>
 @app.route('/buildings/<id>', methods=['GET'])
 @requires_auth("get:building-by-id")
@@ -98,11 +116,10 @@ def get_building_by_id(jwt, id):
             'building': [building.show()]
         })
     except Exception:
-        print(jwt)
         abort(404)
 
 
-# implement endpoint
+# Implement endpoint
 # Post /buildings
 @app.route('/buildings', methods=['POST'])
 @requires_auth('post:buildings')
@@ -116,8 +133,7 @@ def add_building(jwt):
     building_image = body.get('building_image')
 
     if not ('ownerID' in body and 'name' in body and 'address' in body
-            and 'description' in body and 'number_of_units' in body
-            and 'building_image' in body):
+            and 'description' in body and 'number_of_units' in body):
         abort(422)
     try:
         new_building = Building(ownerID=ownerID, name=name, address=address,
@@ -133,7 +149,7 @@ def add_building(jwt):
         abort(422)
 
 
-# implement endpoint
+# Implement endpoint
 # Patch /buildings
 @app.route('/buildings/<id>', methods=['PATCH'])
 @requires_auth('patch:buildings')
@@ -172,8 +188,8 @@ def update_building(jwt, id):
         abort(404)
 
 
-# implement endpoint
-# delete /buildings/<id>
+# Implement endpoint
+# Delete /buildings/<id>
 @app.route('/buildings/<id>', methods=['DELETE'])
 @requires_auth('delete:buildings')
 def delete_building(jwt, id):
@@ -191,7 +207,7 @@ def delete_building(jwt, id):
         abort(404)
 
 
-# implement endpoint
+# Implement endpoint
 # Get /buildings/<id>/units
 @app.route('/buildings/<int:building_id>/units', methods=['GET'])
 def get_units_based_on_building(building_id):
@@ -207,7 +223,7 @@ def get_units_based_on_building(building_id):
         abort(404)
 
 
-# implement error handler 422
+# Implement error handler 422
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
@@ -217,7 +233,7 @@ def unprocessable(error):
                     }), 422
 
 
-# implement error handler 404
+# Implement error handler 404
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
@@ -227,7 +243,7 @@ def not_found(error):
                     }), 404
 
 
-# implement error handler for AuthError
+# Implement error handler for AuthError
 @app.errorhandler(AuthError)
 def auth_error_handler(ex):
     return jsonify({
@@ -237,7 +253,7 @@ def auth_error_handler(ex):
                     }), 401
 
 
-# implement error handler 400
+# Implement error handler 400
 @app.errorhandler(400)
 def bad_request(error):
     return jsonify({
